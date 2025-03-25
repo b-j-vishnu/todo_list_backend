@@ -6,7 +6,7 @@ import todo_model from "../model/todos.model";
 
 export const createTodo = async (req: Request, res: Response, next: NextFunction) => {
      try {
-          const { id, title, priority } = req.body
+          const { id, title, priority, description } = req.body
           if (!id || !Types.ObjectId.isValid(id)) {
                return next(new ErrorHandler("Can't add", 400))
           }
@@ -18,7 +18,7 @@ export const createTodo = async (req: Request, res: Response, next: NextFunction
           if (!foundUser) {
                return next(new ErrorHandler("User not found", 404))
           }
-          const newTodo = await todo_model.create({ title, priority })
+          const newTodo = await todo_model.create({ title, priority, description })
           foundUser!.todos?.push(new Types.ObjectId(newTodo?._id as Types.ObjectId))
           await foundUser.save()
 
@@ -84,12 +84,12 @@ export const deleteTodo = async (req: Request, res: Response, next: NextFunction
 
 export const searchTodo = async (req: Request, res: Response, next: NextFunction) => {
      try {
-          const { searchTerm, page = 1, limit = 10 } = req.query
+          const { searchTerm = "", page = 1, limit = 10 } = req.query
           const filteredTodos = await todo_model.aggregate([
                {
                     $facet: {
                          totalCounts: [
-                              { $count: "totalCount" } // Total count before filtering
+                              { $count: "totalCount" }
                          ],
                          filteredData: [
                               {
@@ -120,7 +120,7 @@ export const searchTodo = async (req: Request, res: Response, next: NextFunction
                }
           ]);
           const totalCounts = filteredTodos[0].totalCounts[0].totalCount
-          const filteredCount = filteredTodos[0].filteredData[0].filteredCount
+          const count = filteredTodos[0].filteredData[0].filteredCount
           const data = filteredTodos[0].filteredData[0].data
 
 
@@ -128,8 +128,8 @@ export const searchTodo = async (req: Request, res: Response, next: NextFunction
                success: true,
                message: "Todo searched successfully",
                totalCounts,
-               filteredCount,
-               data
+               count,
+               data,
           })
      } catch (error) {
           next(error)

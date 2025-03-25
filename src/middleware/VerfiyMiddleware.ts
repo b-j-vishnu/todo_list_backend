@@ -6,13 +6,13 @@ import { Types } from 'mongoose'
 
 export const decodeUser = async (req: Request, _res: Response, next: NextFunction) => {
      try {
-          const { refresh_token } = req.cookies
-          if (!refresh_token) {
+          const { token } = req.cookies
+          if (!token) {
                return next(new ErrorHandler("unauthorized", 401))
           }
-          const decodedUser = jwt.verify(refresh_token, process.env.REFRESH_TOKEN!)
+          const decodedUser = jwt.verify(token, process.env.SECRET_TOKEN!)
           if (!decodedUser) {
-               return next(new ErrorHandler("token expired", 400))
+               return next(new ErrorHandler("token expired", 403))
           }
           if (typeof decodedUser === "object" && "_id" in decodedUser) {
                const ObjectId = new Types.ObjectId(decodedUser?._id)

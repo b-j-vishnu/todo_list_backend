@@ -15,15 +15,7 @@ const user_schema = new Schema<IUser>({
           trim: true,
           required: [true, "password is required"]
      },
-     confirm_password: {
-          type: String,
-          trim: true,
-          required: [true, "confirm password is required"]
-     },
-     refresh_token: {
-          type: String,
-          select: false
-     },
+
      todos: [
           {
                ref: "todos",
